@@ -2,8 +2,11 @@ SYRACUSE UNIVERSITY
 IST 659 - DATA ADMINISTRATION CONCEPTS AND DATABASE MANAGEMENT
 
 FINAL PROJECT PROPOSAL
+
 Team Crumbl
-Kishan Rathor Collin Taylor
+
+Kishan Rathor
+Collin Taylor
 
 Project Goals:
 
