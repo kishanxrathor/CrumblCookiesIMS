@@ -1,0 +1,217 @@
+-- DOWN
+IF exists (select * from INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+    where CONSTRAINT_NAME='fk_Payroll_PAYROLL_ID')
+Alter table Department drop constraint fk_Payroll_PAYROLL_ID
+
+IF exists (select * from INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+    where CONSTRAINT_NAME=' fk_Stores_STORE_ID')
+ Alter table department drop constraint fk__Stores_STORE_ID
+
+IF exists (select * from INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+    where CONSTRAINT_NAME='fk_Department_DEPARTMENT_ID')
+ Alter table department drop constraint fk_Department_DEPARTMENT_ID
+
+IF exists (select * from INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+    where CONSTRAINT_NAME='fk_Product_PRODUCT_ID')
+ALTER TABLE Inventory drop constraint fk_Product_PRODUCT_ID
+
+IF exists (select * from INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+    where CONSTRAINT_NAME='fk_Inventory_INVENTORY_ID')
+ALTER TABLE Inventory_Invoices drop constraint fk_Inventory_INVENTORY_ID
+
+IF exists (select * from INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+    where CONSTRAINT_NAME='fk_Customers_CUSTOMER_ID')
+ALTER TABLE Credit_Cards drop constraint fk_Customers_CUSTOMER_ID
+
+Begin
+IF exists (select * from INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+    where CONSTRAINT_NAME='fk_Cookie_Sales_STORE_ID'
+	AND TABLE_NAME = 'Cookie_Sales')
+Alter table CRUMBL_COOKIE.dbo.Cookie_Sales drop constraint fk_Cookie_Sales_STORE_ID
+END
+
+Begin
+IF exists (select * from INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+    where CONSTRAINT_NAME='fk_Cookie_Sales_INVENTORY_ID'
+	AND TABLE_NAME = 'Cookie_Sales')
+Alter table Cookie_Sales drop constraint fk_Cookie_Sales_INVENTORY_ID
+END
+
+BEGIN
+IF exists (select * from INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+    where CONSTRAINT_NAME='fk_Cookie_Sales_CREDIT_CARD_ID'
+	AND TABLE_NAME = 'Cookie_Sales')
+Alter table Cookie_Sales drop constraint fk_Cookie_Sales_CREDIT_CARD_ID
+END
+
+
+
+DROP TABLE IF EXISTS Stores
+DROP TABLE IF EXISTS Payroll
+DROP TABLE IF EXISTS Department
+DROP TABLE IF EXISTS Employees
+DROP TABLE IF EXISTS Product
+DROP TABLE IF EXISTS Inventory
+DROP TABLE IF EXISTS Inventory_Invoices
+DROP TABLE IF EXISTS Customers
+DROP TABLE IF EXISTS Credit_Cards
+DROP TABLE IF EXISTS Cookie_Sales
+
+
+-- UP METADATA
+
+
+-- table #1
+CREATE TABLE Stores
+(
+STORE_ID INT NOT NULL,
+ADDRESS VARCHAR (100) NOT NULL,
+CITY VARCHAR(50) NOT NULL,
+STATE VARCHAR(2) NOT NULL,
+ZIP_CODE VARCHAR(5) NOT NULL,
+PHONE_NUMBER VARCHAR(10) NOT NULL,
+CONSTRAINT pk_Stores_STORE_ID Primary Key (Store_ID),
+CONSTRAINT u_PHONE_NUMBER unique (PHONE_NUMBER)
+)
+
+
+-- table #2
+CREATE TABLE Payroll
+(
+PAYROLL_ID INT not null,
+Position VARCHAR(100) NOT NULL,
+Hourly_Wage MONEY NOT NULL,
+OT_Wage MONEY NOT NULL,
+constraint pk_Payroll_PAYROLL_ID primary key (PAYROLL_ID)
+)
+
+
+--table #3
+CREATE TABLE Department
+(
+DEPARTMENT_ID INT identity not null,
+PAYROLL_ID INT not NULL,
+Department VARCHAR(100) NOT NULL,
+Hours_Required VARCHAR(100) NOT NULL,
+OT_Eligible VARCHAR(1) NOT NULL,
+Benefit_Eligible VARCHAR(1) NOT NULL,
+constraint pk_Department_DEPARTMENT_ID primary key (DEPARTMENT_ID)
+)
+ALTER TABLE Department ADD CONSTRAINT fk_Payroll_PAYROLL_ID FOREIGN KEY (PAYROLL_ID) REFERENCES Payroll(PAYROLL_ID)
+
+
+--table #4
+CREATE TABLE  Employees
+(
+EMPLOYEE_ID int NOT NULL,
+STORE_ID int NOT NULL,
+DEPARTMENT_ID int NOT NULL,
+FIRST_NAME VARCHAR(100) NOT NULL,
+LAST_NAME VARCHAR(100) NOT NULL,
+CONSTRAINT PK_Employees_EMPLOYEE_ID Primary Key (EMPLOYEE_ID)
+)
+
+ALTER TABLE Employees ADD CONSTRAINT fk_Stores_STORE_ID Foreign Key (STORE_ID) References Stores(STORE_ID)
+ALTER TABLE Employees ADD CONSTRAINT fk_Department_DEPARTMENT_ID Foreign Key (DEPARTMENT_ID) References Department(DEPARTMENT_ID)
+
+
+--table #5
+CREATE TABLE  Product
+(
+PRODUCT_ID int identity NOT NULL,
+Cookie_Type VARCHAR(50) NOT NULL,
+Temp VARCHAR(10) NOT NULL,
+Size VARCHAR(10) NOT NULL,
+Filled_or_Frosted VARCHAR(10) NULL,
+CONSTRAINT PK_Product_PRODUCT_ID Primary Key (PRODUCT_ID)
+)
+
+
+--table #6
+CREATE TABLE  Inventory
+(
+INVENTORY_ID int NOT NULL,
+PRODUCT_ID int NOT NULL,
+Inventory_Count int NOT NULL,
+Status VARCHAR(1) NOT NULL,
+CONSTRAINT PK_Inventory_INVENTORY_ID Primary Key (INVENTORY_ID)
+)
+
+ALTER TABLE Inventory ADD CONSTRAINT fk_Product_PRODUCT_ID Foreign Key (PRODUCT_ID) References Product(PRODUCT_ID)
+
+
+--table #7
+CREATE TABLE  Inventory_Invoices
+(
+INVOICE_ID int NOT NULL,
+INVENTORY_ID int NOT NULL,
+Purchase_Amount MONEY NOT NULL,
+Units_Sold int NOT NULL,
+Unit_Cost MONEY NOT NULL,
+Invoice_Date DATE NOT NULL
+CONSTRAINT PK_Inventory_Invoices_INVOICE_ID Primary Key (INVOICE_ID)
+)
+
+ALTER TABLE Inventory_Invoices ADD CONSTRAINT fk_Inventory_Inventory_ID Foreign Key (INVENTORY_ID) References Inventory(INVENTORY_ID)
+
+
+--table #8
+CREATE TABLE  Customers
+(
+CUSTOMER_ID int NOT NULL,
+First_Name VARCHAR(100) NOT NULL,
+Last_Name VARCHAR(100) NOT NULL,
+Address VARCHAR(150) NOT NULL,
+City VARCHAR(100) NOT NULL,
+State VARCHAR(10) NOT NULL,
+Zip_Code VARCHAR(5) NOT NULL,
+Phone_Number VARCHAR(10)
+CONSTRAINT PK_Customers_CUSTOMER_ID Primary Key (CUSTOMER_ID)
+)
+
+
+--table #9
+CREATE TABLE  Credit_Cards
+(
+CREDIT_CARD_ID bigint NOT NULL,
+Customer_ID int NOT NULL,
+Brand VARCHAR(100) NOT NULL,
+Exp_month VARCHAR(10) NOT NULL,
+Exp_year int NOT NULL,
+CVV int NOT NULL,
+CONSTRAINT PK_Credit_Cards_CREDIT_CARD_ID Primary Key (CREDIT_CARD_ID)
+)
+
+ALTER TABLE Credit_Cards ADD CONSTRAINT fk_Customers_CUSTOMER_ID Foreign Key (Customer_ID) References Customers(Customer_ID)
+
+
+--table #10
+CREATE TABLE Cookie_Sales
+(
+Sale_ID int NOT NULL,
+STORE_ID int NOT NULL,
+INVENTORY_ID int NOT NULL,
+CREDIT_CARD_ID bigint NOT NULL,
+Sale_date date NOT NULL,
+Transaction_amount varchar (10) not null,
+Cookie_sale_count int not null,
+Method_of_payment varchar(20),
+CONSTRAINT PK_Sales_SALE_ID Primary Key (SALE_ID)
+)
+
+ALTER TABLE Cookie_Sales ADD CONSTRAINT fk_Cookie_Sales_STORE_ID Foreign Key (STORE_ID) References Stores(STORE_ID)
+ALTER TABLE Cookie_Sales ADD CONSTRAINT fk_Cookie_Sales_INVENTORY_ID Foreign Key (INVENTORY_ID) References Inventory(INVENTORY_ID)
+ALTER TABLE Cookie_Sales ADD CONSTRAINT fk_Cookie_Sales_CREDIT_CARD_ID Foreign Key (CREDIT_CARD_ID) References Credit_Cards(CREDIT_CARD_ID)
+
+
+-- Show Tables
+select * from Stores
+select * from Payroll
+select * from Department
+select * from Employees
+select * from Product
+select * from Inventory
+select * from Inventory_Invoices
+select * from Customers
+select * from Credit_Cards
+select * from Cookie_Sales
